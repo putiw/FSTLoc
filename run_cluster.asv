@@ -1,0 +1,60 @@
+clear all; close all; clc;
+
+% setup path
+addpath(genpath(pwd));
+projectName = 'FSTLoc';
+bidsDir = '~/Desktop/MRI/FSTloc';
+serverDir = '/Volumes/Vision/MRI/recon-bank';
+githubDir = '~/Documents/GitHub';
+fsDir = '/Applications/freesurfer/7.4.1';
+addpath(genpath(fullfile(githubDir, 'wpToolbox')));
+setup_user(projectName,bidsDir,githubDir,fsDir);
+
+subject = 'sub-0248';
+roi = get_mt_range(subject,serverDir,'l');
+rois = get_my_roi(subject,serverDir);
+
+ 
+%vals = load_mgz(subject,serverDir,'prfvista_mov/vexpl','prfvista_mov/sigma','prfvista_mov/eccen','T1MapMyelin/myelin0.5','cd/cd','motion_base/mt+2','transparent/oppo3');
+vals = load_mgz(subject,serverDir,'cd/cd','motion_base/mt+2','transparent/oppo3');
+vals = [vals];
+%%
+val = vals(roi,:);
+val = convert_pc(val);
+% view_fv(subject,serverDir,'l','mt+2','cd/cd');
+%%
+% Clustering into 2 clusters
+[idx2, C2] = kmeans(val, 4);
+% Clustering into 3 clusters
+[idx3, C3] = kmeans(val, 3);
+%%
+% Silhouette plot for 2 clusters
+figure;
+subplot(1,2,1);
+silhouette(val, idx2);
+title('Silhouette for 2 Clusters');
+
+% Silhouette plot for 3 clusters
+subplot(1,2,2);
+silhouette(val, idx3);
+title('Silhouette for 3 Clusters');
+
+%%
+% For 2 clusters with multiple initial centroids
+[idx2, C2] = kmeans(val, 5, 'Replicates', 10);
+
+% For 3 clusters with multiple initial centroids
+[idx3, C3] = kmeans(val, 3, 'Replicates', 10);
+
+[coeff, score, ~] = pca(val);
+figure;
+scatter3(score(:,1), score(:,2), score(:,3), 10, idx2, 'filled');
+title('PCA-based Visualization');
+
+%%
+tmp = zeros(size(vals,1),1);
+% idx3(idx3==1)=4;
+tmp(roi) = val(:,1)=;
+pw_save_mgh(subject,serverDir,'cluster',tmp,'diff','l');
+%%
+view_fv(subject,serverDir,'l','idx2','idx3')
