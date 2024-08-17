@@ -4,8 +4,8 @@ addpath(genpath('~/Documents/GitHub/wptoolbox'));
 bidsDir = '/Volumes/Vision/MRI/recon-bank';
 
 subs = {'sub-0037','sub-0201','sub-0248','sub-0250','sub-0255','sub-0392','sub-0395','sub-0397','sub-0426'};
-whichFolder = 'transparent';%'prfvista_mov';%'T1MapMyelin';%'cd';%'prfvista_mov';%'T1MapMyelin'; %'motion_base';%'myelin'; %prfvista_mov'; % 'myelin'; % 'transparent';
-whichMgz = 'oppo3';%'sigma';%'angle_adj';%'eccen';%'myelin0.5';%'cd2';%'angle_adj';%'MyelinMap_BCpercentile'; %'sigma'; % 'MyelinMap_BC';%'oppo3'; 'eccen'
+whichFolder = 'prfvista_mov';%'prfvista_mov';%'T1MapMyelin';%'cd';%'prfvista_mov';%'T1MapMyelin'; %'motion_base';%'myelin'; %prfvista_mov'; % 'myelin'; % 'transparent';
+whichMgz = 'vexpl';%'sigma';%'angle_adj';%'eccen';%'myelin0.5';%'cd2';%'angle_adj';%'MyelinMap_BCpercentile'; %'sigma'; % 'MyelinMap_BC';%'oppo3'; 'eccen'
 mgzPath = sprintf('%s/derivatives/%s/fsaverage',bidsDir,whichFolder);
 
 %% convert fsnative to fsaverge

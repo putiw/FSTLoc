@@ -2,7 +2,11 @@ function plot_shift(val,rois)
 mycolor = [52, 152, 219 ; 243, 156, 18]./255;
 
 fig = figure;
-set(fig, 'Position', [100 500 200 160]);
+%set(fig, 'Position', [100 500 200 160]); % mar 11 mon night commented it
+set(fig, 'Position', [100 500 190 230]); % for figure individual hemi 8
+
+
+
 hold on
 whichRoi = [1 2];
 lineplot = zeros(10,numel(whichRoi));

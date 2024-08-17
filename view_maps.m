@@ -1,8 +1,9 @@
 %% define path
-subject = 'sub-0248';
-
-bidsDir = '/Volumes/Vision/MRI/recon-bank';
+subject = 'sub-0230';
+bidsDir = '/Users/pw1246/Documents/MRI/CueIntegration2024';
+view_fv(subject,bidsDir,'loc_old/mt+2','loc_old/cd')
 %bidsDir = '/Volumes/Vision/UsersShare/Rania/Project_dg/data_bids';
+%%
 
 %%
 cc = view_fv(subject,bidsDir,'l','mt+2');

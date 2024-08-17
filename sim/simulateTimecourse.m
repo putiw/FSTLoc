@@ -1,3 +1,4 @@
+addpath(genpath('/Users/pw1246/Documents/GitHub/vistasoft'));
 load results
 % subject = 'sub-0255';
 % serverDir = '/Volumes/Vision/MRI/recon-bank';
@@ -7,7 +8,6 @@ load results
 stimradius = 12.2; % in degrees
 tr = 1; % in seconds
 
-nVoxel = 5;
 
 hrf = results.params.analysis.Hrf{1};
 xy = 0;
@@ -15,37 +15,67 @@ datafiles = cell(1,2);
 stimmodel = cell(1,2);
 
 
-rfSize = 15;
-noiseSD = 1;
+figure(1);clf; hold on;
+%%
+whichRFsize = [1 5 10 15 20];
+whichCenter = [0 3 6 9 12]';
 
-rfs=rfGaussian2d(results.params.analysis.X,results.params.analysis.Y,repelem(rfSize,nVoxel,1),repelem(rfSize,nVoxel,1),[],repelem(xy,nVoxel,1),repelem(xy,nVoxel,1));
-for iRun = 1:2
-  figure(1);clf
-hold on
-    stim = results.params.stim(~isodd(iRun)+1).images_unconvolved;
-    fmriResponse = zeros(nVoxel,size(stim,2));
-    for ivoxel = 1:nVoxel
-        tmp = stim'*rfs(:,ivoxel);
-        predTcs = conv(hrf,tmp');%./max(conv(hrf,tmp')); %stim
-        fmriSignal = predTcs/(mean(predTcs)) - 1;
-        fmriSignal = fmriSignal(:,1:300);
-        noise = noiseSD*std(fmriSignal) * randn(size(fmriSignal));
-        fmriResponse(ivoxel,:) = fmriSignal + noise;
-        % noise = noiseSD * randn(size(fmriSignal));
-        % noisyFmriSignal = fmriSignal + noise;
-        % fmriResponse(ivoxel,:) = 100 * ((noisyFmriSignal/(mean(noisyFmriSignal)) - 1));
-    plot(1:300,fmriResponse(ivoxel,:),'LineWidth',1.5,'Color','k');
-    drawnow
+numV = 50;
+nVoxel = numV*numel(whichCenter);
+
+for ii = 1:numel(whichRFsize)
+
+    rfSize = repelem(whichRFsize(ii),numel(whichCenter)*numV,1);
+
+    noiseSD = 0.8;
+
+    rfs=rfGaussian2d(results.params.analysis.X,results.params.analysis.Y,rfSize,rfSize,[],repelem(whichCenter,numV,1),repelem(whichCenter,numV,1));
+
+    for iRun = 1:2
+
+        stim = results.params.stim(~isodd(iRun)+1).images_unconvolved;
+        fmriResponse = zeros(nVoxel,size(stim,2));
+        for ivoxel = 1:nVoxel
+            tmp = stim'*rfs(:,ivoxel);
+            predTcs = conv(hrf,tmp');%./max(conv(hrf,tmp')); %stim
+            fmriSignal = predTcs/(mean(predTcs)) - 1;
+            fmriSignal = fmriSignal(:,1:300);
+            noise = noiseSD*std(fmriSignal) * randn(size(fmriSignal));
+            fmriResponse(ivoxel,:) = fmriSignal + noise;
+            % noise = noiseSD * randn(size(fmriSignal));
+            % noisyFmriSignal = fmriSignal + noise;
+            % fmriResponse(ivoxel,:) = 100 * ((noisyFmriSignal/(mean(noisyFmriSignal)) - 1));
+        end
+
+        datafiles{iRun} = fmriResponse;
+        stimmodel{iRun} = reshape(stim,101,101,300);
     end
 
-    datafiles{iRun} = fmriResponse;
-    stimmodel{iRun} = reshape(stim,101,101,300);
+    results1 = prfVistasoft(stimmodel, datafiles, stimradius,'tr',tr);
+    xx = results1.model{1}.x0;
+    yy = results1.model{1}.y0;
+
+
+    rr = sqrt(xx.^2 + yy.^2);
+    rr1  = sqrt(whichCenter.^2 + whichCenter.^2);
+
+    plotMean = zeros(2,numel(whichCenter));
+    for kk = 1:numel(whichCenter)
+
+        plotMean(1,kk) = mean(rr(repelem(whichCenter,50,1)==whichCenter(kk)));
+        plotMean(2,kk) = std(rr(repelem(whichCenter,50,1)==whichCenter(kk)))./sqrt(50);
+
+    end
+
+fill([rr1', fliplr(rr1')], [plotMean(1,:) - plotMean(2,:), fliplr(plotMean(1,:) + plotMean(2,:))], [0.9 0.9 0.9], 'LineStyle', 'none'); %
+plot(rr1, plotMean(1,:), 'k-', 'LineWidth', 2);
+drawnow
+
 end
 
-results1 = prfVistasoft(stimmodel, datafiles, stimradius,'tr',tr);
-xx = results1.model{1}.x0;
-yy = results1.model{1}.y0;
-rr = results1.model{1}.sigma.major;
+
+
+%%
 
 figure(2);clf
 hold on;
